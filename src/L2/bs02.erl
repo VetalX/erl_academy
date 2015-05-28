@@ -1,8 +1,8 @@
 -module(bs02).
 -export([words/1]).
 
-words(B) ->
-    words(B, <<>>, []).
+words(Bin) ->
+    words(Bin, <<>>, []).
 
 words(<<" ", Rest/binary>>, Acc1, Acc2) ->
     words(Rest, <<>>, [Acc1 | Acc2]);
