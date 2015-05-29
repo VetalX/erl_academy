@@ -1,7 +1,13 @@
 -module(bs01).
--export([fw/1, fw2/1, fw3/1]).
+-export([fw/1, fw1/1, fw2/1, fw3/1]).
 
-fw(Bin) ->
+fw(Bin) when is_binary(Bin) -> fw(Bin, <<>>).
+fw(<<" ", _Rest/binary>>, Acc)-> Acc;
+fw(<<B, Rest/binary>>,  Acc)-> fw(Rest, <<Acc/binary, B>>);
+fw(<<>>,  Acc)-> Acc.
+
+
+fw1(Bin) when is_binary(Bin) ->
     Len = first_one([ if <<B>> == <<" ">> -> 1; true -> 0 end || <<B>> <= Bin]),
     <<Word:Len/binary, _Rest/binary>> = Bin,
     Word.
@@ -18,7 +24,7 @@ first_one([_|T], Acc) ->
 first_one([], Acc) ->
     Acc.
 
-fw2(Bin) ->
+fw2(Bin) when is_binary(Bin) ->
     Self = self(),
     [begin
          Reg = lists:member(spawn_fw, registered()),
@@ -46,7 +52,7 @@ fw2(Bin) ->
     end.
 
 
-fw3(Bin) ->
+fw3(Bin) when is_binary(Bin) ->
     put(space, false),
     << << (begin 
          Space = get(space),
