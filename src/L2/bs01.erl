@@ -1,7 +1,7 @@
 -module(bs01).
--export([first_word/1, fw/1]).
+-export([fw/1, fw2/1, fw3/1]).
 
-first_word(Bin) ->
+fw(Bin) ->
     Len = first_one([ if <<B>> == <<" ">> -> 1; true -> 0 end || <<B>> <= Bin]),
     <<Word:Len/binary, _Rest/binary>> = Bin,
     Word.
@@ -18,31 +18,41 @@ first_one([_|T], Acc) ->
 first_one([], Acc) ->
     Acc.
 
-fw(Bin) ->
+fw2(Bin) ->
     Self = self(),
-    Foo = fun(Fun, Acc, P) -> 
-                  receive
-                      {msg, B} -> 
-                          Fun(Fun, <<Acc/binary, B/binary>>, P);
-                      stop -> 
-                          P ! Acc;
-                      _ -> exit
-                  end
-          end,
     [begin
          Reg = lists:member(spawn_fw, registered()),
          if not Reg ->
+                Foo = fun(Fun, Acc, P) -> 
+                              receive
+                                  {msg, B1} -> 
+                                      Fun(Fun, <<Acc/binary, B1/binary>>, P);
+                                  stop -> 
+                                      P ! Acc;
+                                  _ -> exit
+                              end
+                      end,
                 Start = fun() -> Foo(Foo, <<>>, Self) end,
                 Pid = spawn(Start),
                 register(spawn_fw, Pid);
             true -> do_nothing
          end,
-         
          if <<B>> == <<" ">> -> spawn_fw ! stop; true -> spawn_fw ! {msg, <<B>>} end 
-     
      end || <<B>> <= Bin ],
     receive
         Msg -> Msg
     after
         1000 -> timeout
     end.
+
+
+fw3(Bin) ->
+    put(space, false),
+    << << (begin 
+         Space = get(space),
+         case <<B>> of
+             <<" ">> when Space == false -> put(space, true), <<>>;
+             <<B>> when Space == false -> <<B>>;
+             _ -> <<>>
+          end
+    end)/binary >> || <<B>> <= Bin >>.
