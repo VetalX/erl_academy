@@ -19,22 +19,30 @@ first_one([], Acc) ->
     Acc.
 
 fw(Bin) ->
-        F = fun() -> 
-            receive
-                B -> io:format("B ~p~n", [B])
-            end
-        end,
-        A = spawn_opt(F, []), 
-        io:format("A ~p~n", [A]),
-        A = spawn_opt(F, []), 
-        io:format("A ~p~n", [A]),
-        A = spawn_opt(F, []), 
-        io:format("A ~p~n", [A]),
-        A = spawn_opt(F, []), 
-        io:format("A ~p~n", [A]),
-        A = spawn_opt(F, []), 
-        io:format("A ~p~n", [A]),
-    [ begin
-    
-        if <<B>> == <<" ">> -> false; true -> A ! <<B>> end 
-    end || <<B>> <= Bin].
+    Self = self(),
+    Foo = fun(Fun, Acc, P) -> 
+                  receive
+                      {msg, B} -> 
+                          Fun(Fun, <<Acc/binary, B/binary>>, P);
+                      stop -> 
+                          P ! Acc;
+                      _ -> exit
+                  end
+          end,
+    [begin
+         Reg = lists:member(spawn_fw, registered()),
+         if not Reg ->
+                Start = fun() -> Foo(Foo, <<>>, Self) end,
+                Pid = spawn(Start),
+                register(spawn_fw, Pid);
+            true -> do_nothing
+         end,
+         
+         if <<B>> == <<" ">> -> spawn_fw ! stop; true -> spawn_fw ! {msg, <<B>>} end 
+     
+     end || <<B>> <= Bin ],
+    receive
+        Msg -> Msg
+    after
+        1000 -> timeout
+    end.
