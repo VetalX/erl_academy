@@ -1,5 +1,5 @@
 -module(bs01).
--export([first_word/1]).
+-export([first_word/1, fw/1]).
 
 first_word(Bin) ->
     Len = first_one([ if <<B>> == <<" ">> -> 1; true -> 0 end || <<B>> <= Bin]),
@@ -17,3 +17,24 @@ first_one([_|T], Acc) ->
 
 first_one([], Acc) ->
     Acc.
+
+fw(Bin) ->
+        F = fun() -> 
+            receive
+                B -> io:format("B ~p~n", [B])
+            end
+        end,
+        A = spawn_opt(F, []), 
+        io:format("A ~p~n", [A]),
+        A = spawn_opt(F, []), 
+        io:format("A ~p~n", [A]),
+        A = spawn_opt(F, []), 
+        io:format("A ~p~n", [A]),
+        A = spawn_opt(F, []), 
+        io:format("A ~p~n", [A]),
+        A = spawn_opt(F, []), 
+        io:format("A ~p~n", [A]),
+    [ begin
+    
+        if <<B>> == <<" ">> -> false; true -> A ! <<B>> end 
+    end || <<B>> <= Bin].
