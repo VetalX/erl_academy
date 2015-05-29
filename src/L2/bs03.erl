@@ -2,14 +2,15 @@
 -export([split/2]).
 
 split(Bin, Split) ->
-    split(Bin, Split, <<>>, []).
+    SplitSize = byte_size(Split),
+    split(Bin, SplitSize, Split, <<>>, []).
 
-split(<<B:1/binary, Rest/binary>>, Split, <<Acc1, Split/binary>>, Acc2) ->
-    split(Rest, Split, <<B:1/binary>>, [Acc1 | Acc2]);
-
-split(<<B:1/binary, Rest/binary>>, Split, Acc1, Acc2) ->
-    io:format("Acc1 ~p~n", [Acc1]),
-    split(Rest, Split, <<Acc1/binary, B:1/binary>>, Acc2);
-
-split(<<>>, _, Acc1, Acc2) ->
-    lists:reverse([Acc1 | Acc2]).
+split(Bin, SplitSize, Split, Acc1, Acc2) ->
+    case Bin of
+        <<Split:SplitSize/binary, Rest/binary>> ->
+            split(Rest, SplitSize, Split, <<>>, [Acc1 | Acc2]);
+        <<B:1/binary, Rest/binary>> ->
+            split(Rest, SplitSize, Split, <<Acc1/binary, B:1/binary>>, Acc2);
+        <<>> ->
+            lists:reverse([Acc1 | Acc2])
+    end.
