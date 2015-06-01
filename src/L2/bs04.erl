@@ -43,7 +43,7 @@ push_text_body(Text, [H|T]) ->
     {TagName, [], []} = H,
     [{TagName, [], [Text]} | T].
 
-push_close_tag(TagName, [{TagName, [], Body}]) ->
+push_close_tag(TagName, [{TagName, [], Body}]) -> %% root element
     [{TagName, [], lists:reverse( Body )}];
 
 push_close_tag(TagName, [{TagName, [], TagBody} | [{ParentTag, [], ParentBody} | ParentTail ]]) ->
