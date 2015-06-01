@@ -44,13 +44,7 @@ push_text_body(Text, [H|T]) ->
     [{TagName, [], [Text]} | T].
 
 push_close_tag(TagName, [{TagName, [], Body}]) ->
-    [{TagName, [], Body}];
+    [{TagName, [], lists:reverse( Body )}];
 
-push_close_tag(TagName, [H|T]) ->
-    {TagName, [], TagBody} = H,
-    [ParentHead | ParentTail]  = T,
-    {ParentTag, [], ParentBody} = ParentHead,
-    case ParentTail of
-        [] -> [{ParentTag, [], lists:reverse([{TagName, [], TagBody} | ParentBody]) }];
-        _ -> [{ParentTag, [], [{TagName, [], TagBody} | ParentBody]}, ParentTail] 
-    end.
+push_close_tag(TagName, [{TagName, [], TagBody} | [{ParentTag, [], ParentBody} | ParentTail ]]) ->
+    [{ParentTag, [], [{TagName, [], lists:reverse(TagBody) } | ParentBody] } | ParentTail].
