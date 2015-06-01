@@ -2,13 +2,11 @@
 -export([split/2]).
 
 split(Bin, Split) when is_binary(Split) ->
-    SplitSize = byte_size(Split),
-    split(Bin, SplitSize, Split, <<>>, []);
+    split(Bin, byte_size(Split), Split, <<>>, []);
 
 split(Bin, Split) when is_list(Split) ->
     SplitBin = list_to_binary(Split),
-    SplitSize = byte_size(SplitBin),
-    split(Bin, SplitSize, SplitBin, <<>>, []).
+    split(Bin, byte_size(SplitBin), SplitBin, <<>>, []).
 
 split(Bin, SplitSize, Split, Acc1, Acc2) ->
     case Bin of
