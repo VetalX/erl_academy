@@ -37,7 +37,7 @@ decode_xml(<<B:1/binary, Rest/binary>>, close_tag, Acc1, Acc2) ->
     decode_xml(Rest, close_tag, <<Acc1/binary, B:1/binary>>, Acc2);
 
 decode_xml(_, _, <<>>, Acc2) ->
-    lists:reverse(Acc2).
+    hd(lists:reverse(Acc2)).
 
 push_text_body(Text, [{TagName, [], []} | T]) ->
     [{TagName, [], [Text]} | T].
